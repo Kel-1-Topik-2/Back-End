@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -28,7 +29,7 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 @Entity
-@Table(name = "M_DOKTER")
+@Table(name = "M_DOKTER", uniqueConstraints = {@UniqueConstraint(columnNames = {"srp"})})
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
@@ -43,7 +44,7 @@ public class Dokter extends BaseEntityWithDeletedAt{
     @Column(name = "nama_dokter", nullable = false)
     private String namadokter;
 
-    @Column(name = "spesialis", nullable = false)
+    @Column(name = "spesialis", nullable = false,unique = true)
     private String spesialis;
 
     @Column(name = "srp", nullable = false)
