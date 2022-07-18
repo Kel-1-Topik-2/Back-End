@@ -1,6 +1,6 @@
 package com.project.capstone.domain.dao;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,13 +11,17 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
-// import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.project.capstone.domain.dao.base.BaseEntityWithDeletedAt;
+import com.project.capstone.domain.dao.base.BaseEntity;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -31,7 +35,9 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class Jadwal extends BaseEntityWithDeletedAt{
+@SQLDelete(sql = "UPDATE M_JADWAL SET deleted = true WHERE id=?")
+@Where(clause = "deleted = false")
+public class Jadwal extends BaseEntity{
     
     private static final long serialVersionUID = 1L;
 
@@ -47,7 +53,7 @@ public class Jadwal extends BaseEntityWithDeletedAt{
 
     @Column(name = "controll")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date controll;
+    private LocalDate controll;
 
     @Column(name = "catatan")
     private String catatan;
@@ -57,7 +63,7 @@ public class Jadwal extends BaseEntityWithDeletedAt{
 
     @Column(name = "tanggal_kunjungan", nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date tanggal;
+    private LocalDate tanggal;
 
     @ManyToOne
     @JoinColumn (name = "dokter_id", referencedColumnName = "id")
@@ -67,16 +73,7 @@ public class Jadwal extends BaseEntityWithDeletedAt{
     @JoinColumn (name = "pasien_id", referencedColumnName = "id")
     private Pasien pasien;
     
-    // @OneToOne(cascade = CascadeType.ALL)
-    // @JoinColumn (name = "review_id", referencedColumnName = "id")
-    // @JsonIgnore
-    // private Review review;
-
-    // @OneToOne(mappedBy="jadwal")
-    // private Review review;
-
-    // @OneToOne(fetch = FetchType.LAZY,
-    //         cascade =  CascadeType.ALL,
-    //         mappedBy = "jadwal")
-    // private Review review;
+    @JsonIgnore
+    @Builder.Default
+    private Boolean deleted = Boolean.FALSE;
 }

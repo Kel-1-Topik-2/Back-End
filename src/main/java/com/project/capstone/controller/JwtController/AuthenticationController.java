@@ -4,12 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.project.capstone.constant.AppConstant;
-
-import com.project.capstone.response.RegistrationRequest;
+import com.project.capstone.domain.dao.User;
+import com.project.capstone.domain.dto.UserRequest;
 import com.project.capstone.response.TokenResponse;
-import com.project.capstone.response.UsernamePassword;
 import com.project.capstone.service.implementations.AuthService;
 import com.project.capstone.util.ResponseUtil;
 
@@ -23,7 +23,7 @@ public class AuthenticationController {
     AuthService authenticationService;
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> authenticateUser(@RequestBody UsernamePassword loginRequest) {
+    public ResponseEntity<TokenResponse> authenticateUser(@RequestBody UserRequest loginRequest) {
         log.info("Incoming password login request.");
         TokenResponse tokenResponse = authenticationService.generatedToken(loginRequest);
         log.info("Successfully authenticated.");
@@ -32,10 +32,20 @@ public class AuthenticationController {
 
   
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegistrationRequest request) {
+    public ResponseEntity<?> registerUser(@RequestBody UserRequest request) {
         try {
-            authenticationService.register(request);
-            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, request, HttpStatus.OK);
+            User user = authenticationService.register(request);
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, user, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);        
+        }
+    }
+
+    @PutMapping("/updateuser/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable(value = "id") Long userId,@RequestBody UserRequest request) {
+        try {
+            User user = authenticationService.updateUser(request, userId);
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, user, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);        
         }

@@ -1,5 +1,6 @@
 package com.project.capstone.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.project.capstone.constant.AppConstant;
@@ -32,13 +33,18 @@ public class DokterService {
 
     public ResponseEntity<Object> getAll() {
         log.info("Get all dokter");
-        //return ResponseUtil.build("Success", customerRepository.findAll(), HttpStatus.OK);
-        return ResponseEntity.ok().body(dokterRepository.findAll());
+        return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, dokterRepository.findAll(), HttpStatus.OK);
+        // return ResponseEntity.ok().body(dokterRepository.findAll());
     }
 
     public ResponseEntity<Object> save(DokterRequest request) {
         try {
-        User user = userRepository.findOne(request.getUserId())
+            log.info("Search srp in database");
+            if (dokterRepository.findDokterBySrp(request.getSrp()) != null) {
+                throw new Exception("Dokter IS ALREADY EXIST");
+            }
+
+        User user = userRepository.findById(request.getUserId())
             .orElseThrow(()-> new Exception("Dokter Id "+ request.getUserId() + "Not Found"));
 
         log.info("Save new Dokter: {}", request);
@@ -59,14 +65,10 @@ public class DokterService {
         }
     }
 
-    public ResponseEntity<Object> getDokter(Long dokterId) {
-        return ResponseEntity.ok().body(dokterRepository.findById(dokterId));
-    }
-
-    public ResponseEntity<Object> deleteDokter(Long id) {
-        log.info("Find dokter by dokter id for delete: {}", id);
+    public ResponseEntity<Object> deleteDokter(Long Id) {
+        log.info("Find dokter by dokter id for delete: {}", Id);
         try {
-            dokterRepository.delete(id);
+            dokterRepository.deleteById(Id);
         } catch (EmptyResultDataAccessException e) {
             log.error("Data not found. Error: {}", e.getMessage());
             return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.NOT_FOUND);
@@ -76,7 +78,7 @@ public class DokterService {
 
     public ResponseEntity<Object> getDokterById(Long id) {
         log.info("Find Dokter detail by dokter id: {}",id);
-        Optional<Dokter> dokter = dokterRepository.findOne(id);
+        Optional<Dokter> dokter = dokterRepository.findById(id);
         if (dokter.isEmpty()) return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.NOT_FOUND);
 
         return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, dokter.get(), HttpStatus.OK);
@@ -89,7 +91,7 @@ public class DokterService {
             User user = userRepository.findById(request.getUserId())
             .orElseThrow(()-> new Exception("Dokter Id "+ request.getUserId() + "Not Found"));
 
-            Optional<Dokter> dokter = dokterRepository.findOne(id);
+            Optional<Dokter> dokter = dokterRepository.findById(id);
             if (dokter.isEmpty()) {
                 log.info("dokter not found");
                 return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.NOT_FOUND);
@@ -109,19 +111,22 @@ public class DokterService {
         }
     }
 
+    public List<Dokter> getDokterByUser(String userId) {
+        try {
+            Long id = Long.parseLong(userId);
+            log.info("Get user {}", id);
+            Optional<User> user = userRepository.findById(id);
+            if (user.isEmpty()) {
+                log.info("user not found");
+            }
+            List<Dokter> dokter = dokterRepository.findDokterByUser(id);
 
-    // public ResponseEntity<Object> updatedokter(DokterRequest request, Long dokterId) {
-    //     log.info("Update nama: {}", request);
-    //     Optional<Dokter> dokter = dokterRepository.findById(dokterId);
-    //     if (dokter.isEmpty()) return ResponseEntity.badRequest().body(Map.ofEntries(Map.entry("message", "Data not found")));
-
-    //     dokter.get().setNamadokter(request.getNamadokter());
-    //     dokter.get().setSpesialis(request.getSpesialis());
-    //     // dokter.get().setSrp(request.getSrp());
-    //     // dokter.get().setJeniskelamin(request.getJeniskelamin());
-    //     // dokter.get().setTelp(request.getTelp());
-    //     // dokterRepository.save(dokter.get());
-    //     return ResponseEntity.ok().body(dokter.get());
-    // }
+            if(dokter.isEmpty()) throw new Exception("DOKTER NOT FOUND");
+            return dokter;
+        } catch (Exception e) {
+            log.error("Get course taken by user error");
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
    
 }
