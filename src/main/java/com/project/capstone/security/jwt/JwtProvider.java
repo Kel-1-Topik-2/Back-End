@@ -1,17 +1,12 @@
 package com.project.capstone.security.jwt;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import com.project.capstone.domain.dao.User;
 import com.project.capstone.service.implementations.UserDetailsImpl;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -29,9 +24,12 @@ public class JwtProvider {
         UserDetailsImpl user = (UserDetailsImpl) auth.getPrincipal();
 
         return Jwts.builder()
+            .setId(user.getId().toString())
             .setSubject(user.getUsername())
             .signWith(key)
             .compact();
+
+        
     }
     public boolean validatedToken(String token){
 
@@ -53,5 +51,9 @@ public class JwtProvider {
 
     public String getUsername(String token){
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
+    }
+
+    public String getId(String token){
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getId();
     }
 }

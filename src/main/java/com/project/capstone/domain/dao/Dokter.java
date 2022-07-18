@@ -12,14 +12,17 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.project.capstone.domain.dao.base.BaseEntityWithDeletedAt;
+import com.project.capstone.domain.dao.base.BaseEntity;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -29,11 +32,13 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 @Entity
-@Table(name = "M_DOKTER", uniqueConstraints = {@UniqueConstraint(columnNames = {"srp"})})
+@Table(name = "M_DOKTER")
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class Dokter extends BaseEntityWithDeletedAt{
+@SQLDelete(sql = "UPDATE M_DOKTER SET deleted = true WHERE id=?")
+@Where(clause = "deleted = false")
+public class Dokter extends BaseEntity{
     
     private static final long serialVersionUID = 1L;
 
@@ -44,22 +49,20 @@ public class Dokter extends BaseEntityWithDeletedAt{
     @Column(name = "nama_dokter", nullable = false)
     private String namadokter;
 
-    @Column(name = "spesialis", nullable = false,unique = true)
+    @Column(name = "spesialis", nullable = false)
     private String spesialis;
 
     @Column(name = "srp", nullable = false)
-    private String srp;
+    private Long srp;
     
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "dokter")
     private List<Jadwal> jadwal;
-    
-    // @ManyToOne
-    // @JoinColumn (name = "user_id", referencedColumnName = "id")
-    // private User userdokter;
 
-    @OneToOne(mappedBy="dokter")
+    @OneToOne(mappedBy="dokter",cascade = CascadeType.ALL)
     private User user;
 
-
+    @JsonIgnore
+    @Builder.Default
+    private Boolean deleted = Boolean.FALSE;
 }

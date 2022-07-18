@@ -1,7 +1,7 @@
 package com.project.capstone.domain.dto;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -27,8 +27,8 @@ public class JadwalRequest implements Serializable {
     private Long pasienId;
     private Integer nourut;
     private String jp;
-    private Date tanggal;
-    private Date controll;
+    private LocalDate tanggal;
+    private LocalDate controll;
     private String catatan;
     private String diagnosa;
 

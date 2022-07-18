@@ -1,11 +1,3 @@
-// package com.project.demo.service;
-
-// import org.springframework.security.core.userdetails.UserDetailsService;
-
-// public interface UserService extends UserDetailsService{
-
-// }
-
 package com.project.capstone.service;
 
 import java.util.Optional;
@@ -53,13 +45,9 @@ public class UserService {
         return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, userRepository.findAll(), HttpStatus.OK);
     }
 
-    public ResponseEntity<Object> getUser(Long userId) {
-        return ResponseEntity.ok().body(userRepository.findById(userId));
-    }
-
     public ResponseEntity<Object> getUserDetail(Long id) {
         log.info("Find user detail by user id: {}",id);
-        Optional<User> user = userRepository.findOne(id);
+        Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.NOT_FOUND);
 
         return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, user.get(), HttpStatus.OK);
@@ -68,7 +56,7 @@ public class UserService {
     public ResponseEntity<Object> deleteUser(Long Id) {
         log.info("Find user by user id for delete: {}", Id);
         try {
-            userRepository.delete(Id);
+            userRepository.deleteById(Id);
         } catch (EmptyResultDataAccessException e) {
             log.error("Data not found. Error: {}", e.getMessage());
             return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.NOT_FOUND);
@@ -79,13 +67,13 @@ public class UserService {
     public ResponseEntity<Object> updateUser(UserRequest request, Long id) {
         try {
             log.info("Update user: {}", request);
-            Optional<User> user = userRepository.findOne(id);
+            Optional<User> user = userRepository.findById(id);
             if (user.isEmpty()) {
                 log.info("user not found");
                 return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.NOT_FOUND);
             }
 
-            user.get().setUsername(request.getUsername());;
+            user.get().setUsername(request.getUsername());
             user.get().setPassword(request.getPassword());
             // user.get().setRole(request.getRole());
             userRepository.save(user.get());
